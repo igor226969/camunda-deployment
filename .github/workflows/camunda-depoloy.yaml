@@ -1,0 +1,150 @@
+name: Camunda Deployment
+
+on:
+  # Trigger on push to specific branches - excluding dev
+  push:
+    branches:
+      - uat
+      - staging
+      - pre-prod
+      - prod
+  
+  # Allow manual triggering from GitHub Actions UI for all environments
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - uat
+          - staging
+          - pre-prod
+          - prod
+
+jobs:
+  deploy-to-camunda:
+    name: Deploy to Camunda
+    # Determine environment from branch or manual input
+    runs-on: ubuntu-latest
+    
+    # Extract environment name from branch or input
+    env:
+      ENVIRONMENT: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || github.ref_name }}
+    
+    # Use GitHub environments for better security and deployment tracking
+    environment: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || github.ref_name }}
+    
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+      
+      - name: Set up environment variables
+        id: env-setup
+        run: |
+          echo "DEPLOYMENT_NAME=deploy-${ENVIRONMENT}-$(date +%Y%m%d-%H%M%S)" >> $GITHUB_ENV
+          echo "Deploying to ${{ env.ENVIRONMENT }} environment"
+      
+      - name: Configure environment-specific variables
+        id: env-config
+        run: |
+          case "${{ env.ENVIRONMENT }}" in
+            dev)
+              echo "ZEEBE_CLIENT_ID=${{ secrets.ZEEBE_CLIENT_ID_DEV }}" >> $GITHUB_ENV
+              echo "ZEEBE_CLIENT_SECRET=${{ secrets.ZEEBE_CLIENT_SECRET_DEV }}" >> $GITHUB_ENV
+              echo "REGION_ID=${{ secrets.REGION_ID_DEV }}" >> $GITHUB_ENV
+              echo "CLUSTER_ID=${{ secrets.CLUSTER_ID_DEV }}" >> $GITHUB_ENV
+              ;;
+            uat)
+              echo "ZEEBE_CLIENT_ID=${{ secrets.ZEEBE_CLIENT_ID_UAT }}" >> $GITHUB_ENV
+              echo "ZEEBE_CLIENT_SECRET=${{ secrets.ZEEBE_CLIENT_SECRET_UAT }}" >> $GITHUB_ENV
+              echo "REGION_ID=${{ secrets.REGION_ID_UAT }}" >> $GITHUB_ENV
+              echo "CLUSTER_ID=${{ secrets.CLUSTER_ID_UAT }}" >> $GITHUB_ENV
+              ;;
+            staging)
+              echo "ZEEBE_CLIENT_ID=${{ secrets.ZEEBE_CLIENT_ID_STAGING }}" >> $GITHUB_ENV
+              echo "ZEEBE_CLIENT_SECRET=${{ secrets.ZEEBE_CLIENT_SECRET_STAGING }}" >> $GITHUB_ENV
+              echo "REGION_ID=${{ secrets.REGION_ID_STAGING }}" >> $GITHUB_ENV
+              echo "CLUSTER_ID=${{ secrets.CLUSTER_ID_STAGING }}" >> $GITHUB_ENV
+              ;;
+            pre-prod)
+              echo "ZEEBE_CLIENT_ID=${{ secrets.ZEEBE_CLIENT_ID_PREPROD }}" >> $GITHUB_ENV
+              echo "ZEEBE_CLIENT_SECRET=${{ secrets.ZEEBE_CLIENT_SECRET_PREPROD }}" >> $GITHUB_ENV
+              echo "REGION_ID=${{ secrets.REGION_ID_PREPROD }}" >> $GITHUB_ENV
+              echo "CLUSTER_ID=${{ secrets.CLUSTER_ID_PREPROD }}" >> $GITHUB_ENV
+              ;;
+            prod)
+              echo "ZEEBE_CLIENT_ID=${{ secrets.ZEEBE_CLIENT_ID_PROD }}" >> $GITHUB_ENV
+              echo "ZEEBE_CLIENT_SECRET=${{ secrets.ZEEBE_CLIENT_SECRET_PROD }}" >> $GITHUB_ENV
+              echo "REGION_ID=${{ secrets.REGION_ID_PROD }}" >> $GITHUB_ENV
+              echo "CLUSTER_ID=${{ secrets.CLUSTER_ID_PROD }}" >> $GITHUB_ENV
+              ;;
+            *)
+              echo "::error::Invalid environment: ${{ env.ENVIRONMENT }}"
+              exit 1
+              ;;
+          esac
+      
+      - name: Install required dependencies
+        run: sudo apt-get install -y jq curl
+      
+      - name: Make deployment script executable
+        run: chmod +x ./zeebe-deploy-cicd.sh
+      
+      - name: Deploy to Camunda
+        id: deploy
+        run: ./zeebe-deploy-cicd.sh
+      
+      - name: Upload deployment response as artifact
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: deployment-response-${{ env.ENVIRONMENT }}
+          path: deployment-response.json
+          retention-days: 30
+      
+      - name: Create deployment status comment
+        if: github.event_name == 'push'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const success = process.env.DEPLOYMENT_SUCCESS === 'true';
+            const status = process.env.DEPLOYMENT_STATUS;
+            const environment = process.env.ENVIRONMENT;
+            
+            // Get the latest commit
+            const commit = context.payload.commits[0];
+            const commitSha = context.sha.substring(0, 7);
+            const commitUrl = `${context.payload.repository.html_url}/commit/${context.sha}`;
+            
+            let body = `## Deployment Status - ${environment.toUpperCase()}\n`;
+            body += `🚀 Commit: [${commitSha}](${commitUrl})\n\n`;
+            body += `${status}\n\n`;
+            
+            if (!success && process.env.DEPLOYMENT_ERROR) {
+              body += `Error details: ${process.env.DEPLOYMENT_ERROR}\n\n`;
+            }
+            
+            body += `To retry deployment manually, go to [Actions](${context.payload.repository.html_url}/actions/workflows/camunda-deploy.yml) and run the workflow manually.`;
+            
+            // Create issue comment
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body
+            }).catch(e => {
+              // If we can't post to the issue (like in a direct push), log to the console
+              console.log('Could not post comment to issue. Deployment status:', status);
+            });
+      
+      - name: Log deployment status
+        run: |
+          echo "::notice::$DEPLOYMENT_STATUS"
+          if [ "$DEPLOYMENT_SUCCESS" != "true" ]; then
+            echo "::error::Deployment failed"
+            exit 1
+          fi
