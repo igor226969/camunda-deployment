@@ -27,14 +27,14 @@ on:
 jobs:
   deploy-to-camunda:
     name: Deploy to Camunda
-    # Determine environment from branch or manual input
     runs-on: ubuntu-latest
     
-    # Extract environment name from branch or input
+    # Extract environment name from branch or manual input
     env:
       ENVIRONMENT: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || github.ref_name }}
     
-    # Use GitHub environments for better security and deployment tracking
+    # This is the key line that specifies which GitHub Environment to use
+    # It will automatically use the environment secrets associated with this environment
     environment: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || github.ref_name }}
     
     steps:
@@ -47,45 +47,15 @@ jobs:
           echo "DEPLOYMENT_NAME=deploy-${ENVIRONMENT}-$(date +%Y%m%d-%H%M%S)" >> $GITHUB_ENV
           echo "Deploying to ${{ env.ENVIRONMENT }} environment"
       
-      - name: Configure environment-specific variables
+      # Simpler configuration using environment-specific secrets
+      - name: Configure environment variables
         id: env-config
         run: |
-          case "${{ env.ENVIRONMENT }}" in
-            dev)
-              echo "ZEEBE_CLIENT_ID=${{ secrets.ZEEBE_CLIENT_ID_DEV }}" >> $GITHUB_ENV
-              echo "ZEEBE_CLIENT_SECRET=${{ secrets.ZEEBE_CLIENT_SECRET_DEV }}" >> $GITHUB_ENV
-              echo "REGION_ID=${{ secrets.REGION_ID_DEV }}" >> $GITHUB_ENV
-              echo "CLUSTER_ID=${{ secrets.CLUSTER_ID_DEV }}" >> $GITHUB_ENV
-              ;;
-            uat)
-              echo "ZEEBE_CLIENT_ID=${{ secrets.ZEEBE_CLIENT_ID_UAT }}" >> $GITHUB_ENV
-              echo "ZEEBE_CLIENT_SECRET=${{ secrets.ZEEBE_CLIENT_SECRET_UAT }}" >> $GITHUB_ENV
-              echo "REGION_ID=${{ secrets.REGION_ID_UAT }}" >> $GITHUB_ENV
-              echo "CLUSTER_ID=${{ secrets.CLUSTER_ID_UAT }}" >> $GITHUB_ENV
-              ;;
-            staging)
-              echo "ZEEBE_CLIENT_ID=${{ secrets.ZEEBE_CLIENT_ID_STAGING }}" >> $GITHUB_ENV
-              echo "ZEEBE_CLIENT_SECRET=${{ secrets.ZEEBE_CLIENT_SECRET_STAGING }}" >> $GITHUB_ENV
-              echo "REGION_ID=${{ secrets.REGION_ID_STAGING }}" >> $GITHUB_ENV
-              echo "CLUSTER_ID=${{ secrets.CLUSTER_ID_STAGING }}" >> $GITHUB_ENV
-              ;;
-            pre-prod)
-              echo "ZEEBE_CLIENT_ID=${{ secrets.ZEEBE_CLIENT_ID_PREPROD }}" >> $GITHUB_ENV
-              echo "ZEEBE_CLIENT_SECRET=${{ secrets.ZEEBE_CLIENT_SECRET_PREPROD }}" >> $GITHUB_ENV
-              echo "REGION_ID=${{ secrets.REGION_ID_PREPROD }}" >> $GITHUB_ENV
-              echo "CLUSTER_ID=${{ secrets.CLUSTER_ID_PREPROD }}" >> $GITHUB_ENV
-              ;;
-            prod)
-              echo "ZEEBE_CLIENT_ID=${{ secrets.ZEEBE_CLIENT_ID_PROD }}" >> $GITHUB_ENV
-              echo "ZEEBE_CLIENT_SECRET=${{ secrets.ZEEBE_CLIENT_SECRET_PROD }}" >> $GITHUB_ENV
-              echo "REGION_ID=${{ secrets.REGION_ID_PROD }}" >> $GITHUB_ENV
-              echo "CLUSTER_ID=${{ secrets.CLUSTER_ID_PROD }}" >> $GITHUB_ENV
-              ;;
-            *)
-              echo "::error::Invalid environment: ${{ env.ENVIRONMENT }}"
-              exit 1
-              ;;
-          esac
+          # These secrets come directly from the GitHub Environment
+          echo "ZEEBE_CLIENT_ID=${{ secrets.ZEEBE_CLIENT_ID }}" >> $GITHUB_ENV
+          echo "ZEEBE_CLIENT_SECRET=${{ secrets.ZEEBE_CLIENT_SECRET }}" >> $GITHUB_ENV
+          echo "REGION_ID=${{ secrets.REGION_ID }}" >> $GITHUB_ENV
+          echo "CLUSTER_ID=${{ secrets.CLUSTER_ID }}" >> $GITHUB_ENV
       
       - name: Install required dependencies
         run: sudo apt-get install -y jq curl
