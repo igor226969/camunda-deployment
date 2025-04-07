@@ -75,43 +75,6 @@ jobs:
           path: deployment-response.json
           retention-days: 30
       
-      - name: Create deployment status comment
-        if: github.event_name == 'push' && github.event.pull_request != null
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const success = process.env.DEPLOYMENT_SUCCESS === 'true';
-            const status = process.env.DEPLOYMENT_STATUS;
-            const environment = process.env.ENVIRONMENT;
-            
-            // Get the latest commit
-            const commitSha = context.sha.substring(0, 7);
-            const commitUrl = `${context.payload.repository.html_url}/commit/${context.sha}`;
-            
-            let body = `## Deployment Status - ${environment.toUpperCase()}\n`;
-            body += `🚀 Commit: [${commitSha}](${commitUrl})\n\n`;
-            body += `${status}\n\n`;
-            
-            if (!success && process.env.DEPLOYMENT_ERROR) {
-              body += `Error details: ${process.env.DEPLOYMENT_ERROR}\n\n`;
-            }
-            
-            body += `To retry deployment manually, go to [Actions](${context.payload.repository.html_url}/actions/workflows/camunda-deploy.yml) and run the workflow manually.`;
-            
-            // Only try to post a comment if we have a PR number
-            if (context.issue && context.issue.number) {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body
-              });
-            } else {
-              console.log('No issue or PR found to comment on.');
-              console.log('Deployment status:', status);
-            }
-      
       - name: Log deployment status
         run: |
           echo "::notice::$DEPLOYMENT_STATUS"
