@@ -76,7 +76,7 @@ jobs:
           retention-days: 30
       
       - name: Create deployment status comment
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && github.event.pull_request != null
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -86,7 +86,6 @@ jobs:
             const environment = process.env.ENVIRONMENT;
             
             // Get the latest commit
-            const commit = context.payload.commits[0];
             const commitSha = context.sha.substring(0, 7);
             const commitUrl = `${context.payload.repository.html_url}/commit/${context.sha}`;
             
@@ -100,16 +99,18 @@ jobs:
             
             body += `To retry deployment manually, go to [Actions](${context.payload.repository.html_url}/actions/workflows/camunda-deploy.yml) and run the workflow manually.`;
             
-            // Create issue comment
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body
-            }).catch(e => {
-              // If we can't post to the issue (like in a direct push), log to the console
-              console.log('Could not post comment to issue. Deployment status:', status);
-            });
+            // Only try to post a comment if we have a PR number
+            if (context.issue && context.issue.number) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body
+              });
+            } else {
+              console.log('No issue or PR found to comment on.');
+              console.log('Deployment status:', status);
+            }
       
       - name: Log deployment status
         run: |
