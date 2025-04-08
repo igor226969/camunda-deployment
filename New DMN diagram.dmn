@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0uvd5w0" name="DRD" namespace="http://camunda.org/schema/1.0/dmn" exporter="Camunda Web Modeler" exporterVersion="ef3429c" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.6.0">
+  <decision id="Decision_0zb8xjd" name="Decision 1">
+    <decisionTable id="DecisionTable_0s6a8na">
+      <input id="Input_1" label="x">
+        <inputExpression id="InputExpression_1" typeRef="string">
+          <text>x</text>
+        </inputExpression>
+      </input>
+      <output id="Output_1" name="y" typeRef="string" />
+    </decisionTable>
+  </decision>
+  <decision id="Decision_052ow51" name="Dec 2">
+    <decisionTable id="DecisionTable_0bk9zo9">
+      <input id="InputClause_0hcvq54" label="z">
+        <inputExpression id="LiteralExpression_0stwaxu" typeRef="string">
+          <text>z</text>
+        </inputExpression>
+      </input>
+      <output id="OutputClause_1hk2ftn" label="c" name="c" typeRef="string" />
+      <rule id="DecisionRule_09apm6a">
+        <inputEntry id="UnaryTests_1uznhie">
+          <text>a</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1ic8t60">
+          <text>a</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram>
+      <dmndi:DMNShape dmnElementRef="Decision_0zb8xjd">
+        <dc:Bounds height="80" width="180" x="160" y="100" />
+      </dmndi:DMNShape>
+      <dmndi:DMNShape id="DMNShape_1siim9c" dmnElementRef="Decision_052ow51">
+        <dc:Bounds height="80" width="180" x="460" y="100" />
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>
