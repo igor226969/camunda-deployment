@@ -5,10 +5,10 @@
       <bpmn:outgoing>Flow_0njkc2y</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:endEvent id="Event_14dk1a3">
-      <bpmn:incoming>Flow_1kl037k</bpmn:incoming>
+      <bpmn:incoming>Flow_1vvz3he</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_0njkc2y" sourceRef="StartEvent_1" targetRef="Activity_CustomConnectorTest" />
-    <bpmn:sequenceFlow id="Flow_1kl037k" sourceRef="Activity_CustomConnectorTest" targetRef="Event_14dk1a3" />
+    <bpmn:sequenceFlow id="Flow_1kl037k" sourceRef="Activity_CustomConnectorTest" targetRef="Activity_00l67wj" />
     <bpmn:serviceTask id="Activity_CustomConnectorTest" name="Call API">
       <bpmn:extensionElements>
         <zeebe:taskDefinition type="io.camunda:http-json:1" retries="3" />
@@ -27,17 +27,26 @@
       <bpmn:incoming>Flow_0njkc2y</bpmn:incoming>
       <bpmn:outgoing>Flow_1kl037k</bpmn:outgoing>
     </bpmn:serviceTask>
+    <bpmn:task id="Activity_00l67wj" name="sss">
+      <bpmn:incoming>Flow_1kl037k</bpmn:incoming>
+      <bpmn:outgoing>Flow_1vvz3he</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_1vvz3he" sourceRef="Activity_00l67wj" targetRef="Event_14dk1a3" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1mu5a6t">
       <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
         <dc:Bounds x="150" y="100" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_14dk1a3_di" bpmnElement="Event_14dk1a3">
-        <dc:Bounds x="482" y="100" width="36" height="36" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0fppryq_di" bpmnElement="Activity_CustomConnectorTest">
         <dc:Bounds x="270" y="78" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_14dk1a3_di" bpmnElement="Event_14dk1a3">
+        <dc:Bounds x="662" y="100" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_00l67wj_di" bpmnElement="Activity_00l67wj">
+        <dc:Bounds x="450" y="78" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_0njkc2y_di" bpmnElement="Flow_0njkc2y">
@@ -46,7 +55,11 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1kl037k_di" bpmnElement="Flow_1kl037k">
         <di:waypoint x="370" y="118" />
-        <di:waypoint x="482" y="118" />
+        <di:waypoint x="450" y="118" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1vvz3he_di" bpmnElement="Flow_1vvz3he">
+        <di:waypoint x="550" y="118" />
+        <di:waypoint x="662" y="118" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
