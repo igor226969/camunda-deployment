@@ -1,4 +1,4 @@
-# Camunda Workflow Project
+# Camunda CI/CD Script
 
 This repository contains scripts for downloading and deploying Camunda BPMN, DMN, and Form files to Zeebe clusters.
 
@@ -10,7 +10,7 @@ Before using the scripts in this repository, ensure you have the following insta
   - Download and install from [Git for Windows](https://gitforwindows.org/)
   
 - **jq** - JSON processor for parsing API responses
-  - A download link will be provided separately
+  - Download and install from [Download jq](https://jqlang.org/download/)
   - Make sure jq is in your PATH or in the same directory as the scripts
 
 The scripts also use curl, which comes pre-installed with Git Bash, so no additional installation is required.
@@ -73,7 +73,7 @@ git commit -m "Add workflow files for WTR-123"
 git push origin dev
 ```
 
-### 4. Promote to Higher Environments
+### 3. Promote to Higher Environments
 
 After successful testing:
 
@@ -89,7 +89,7 @@ Target branch options:
 - prod: Production
 ```
 
-### 5. Automatic Deployment
+### 4. Automatic Deployment
 
 When your pull request is merged:
 
