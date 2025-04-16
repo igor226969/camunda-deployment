@@ -1,44 +1,11 @@
-# Deployment scripts
-camunda-deploy-downloader.sh
-zeebe-auth-test.sh
-zeebe-deploy.sh
-zeebe-deploy-with-validation.sh
-
-# Configuration files that might contain credentials
-.config/
-*.conf
-*.config
-*.credentials
-*.secret
-
-# Temporary files created by the scripts
-project_response.json
-*.tmp
-tmp/
-temp/
-files_list
-
-# Logs
-*.log
-logs/
-
-# Runtime data
+# Ignore environment files with secrets
 .env
-pids
-*.pid
-*.seed
+.env.*
+!.env.template
 
-# Camunda project files
-# Uncomment the following lines if you want to exclude specific file types
-# *.bpmn
-# *.dmn
-# *.form
+# Temporary files
+scripts/project_response.json
+scripts/temp_files.json
 
-# OS specific files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+# Deployment response
+deployment-response.json
