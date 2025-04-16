@@ -4,6 +4,9 @@
 
 set -e  # Exit immediately if a command exits with a non-zero status
 
+# Get the script's directory
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 # Default settings
 ZEEBE_AUTHORIZATION_SERVER_URL="https://login.cloud.camunda.io/oauth/token"
 ZEEBE_TOKEN_AUDIENCE="zeebe.camunda.io"
@@ -16,7 +19,7 @@ ZEEBE_TOKEN_AUDIENCE="zeebe.camunda.io"
 
 # Deployment configuration
 DEPLOYMENT_NAME="${DEPLOYMENT_NAME:-deploy-$(date +%Y%m%d-%H%M%S)}"
-SOURCE_DIR="${SOURCE_DIR:-.}"
+SOURCE_DIR="${SOURCE_DIR:-$SCRIPT_DIR/../src}"  # Default to src folder at the same level as scripts folder
 GITHUB_ENV="${GITHUB_ENV:-/dev/null}"  # GitHub Actions env file or fallback
 ENVIRONMENT="${ENVIRONMENT:-local}"     # GitHub environment or default
 
@@ -170,7 +173,7 @@ deploy_files() {
   RESPONSE=$(eval "$curl_cmd")
   
   # Save response to a file for debugging in GitHub Actions
-  echo "$RESPONSE" > "deployment-response.json"
+  echo "$RESPONSE" > "$SCRIPT_DIR/../deployment-response.json"
   
   # Check if deployment was successful
   if echo "$RESPONSE" | jq empty 2>/dev/null; then
@@ -228,6 +231,7 @@ deploy_files() {
 # Main function
 main() {
   echo "🔷 Starting Zeebe deployment process for $ENVIRONMENT environment..."
+  echo "🔷 Using source directory: $SOURCE_DIR"
   
   # Check if jq is installed
   if ! command -v jq &> /dev/null; then

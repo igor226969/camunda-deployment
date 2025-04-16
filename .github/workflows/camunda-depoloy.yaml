@@ -32,6 +32,7 @@ jobs:
     # Extract environment name from branch or manual input
     env:
       ENVIRONMENT: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || github.ref_name }}
+      SOURCE_DIR: "./src"  # Explicitly set the source directory to the src folder
     
     # This is the key line that specifies which GitHub Environment to use
     # It will automatically use the environment secrets associated with this environment
@@ -61,11 +62,13 @@ jobs:
         run: sudo apt-get install -y jq curl
       
       - name: Make deployment script executable
-        run: chmod +x ./zeebe-deploy-cicd.sh
+        run: chmod +x ./scripts/zeebe-deploy-cicd.sh
       
       - name: Deploy to Camunda
         id: deploy
-        run: ./zeebe-deploy-cicd.sh
+        run: ./scripts/zeebe-deploy-cicd.sh
+        env:
+          SOURCE_DIR: "./src"  # Explicitly set the source directory again to ensure it's passed to the script
       
       - name: Upload deployment response as artifact
         if: always()
