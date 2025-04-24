@@ -37,7 +37,15 @@ The download script requires authentication credentials, which should be stored 
 
 ## 🔄 Workflow Process
 
-### 1. Download BPMN files from Camunda Modeler
+### 1. Always Pull Latest Changes First
+
+> ⚠️ **Important**: Always run `git pull` before running any scripts to ensure you have the latest version of the codebase:
+
+```bash
+git pull origin dev
+```
+
+### 2. Download BPMN files from Camunda Modeler
 
 To download files from a specific folder in your Camunda project using Git Bash:
 
@@ -57,7 +65,29 @@ This will:
 - Find the specified folder in your project
 - Download all BPMN, DMN, and Form files to the `src` directory
 
-### 2. Review & Commit Changes
+### 3. Handling Process Renaming
+
+> ⚠️ **Important**: File renaming and deletion is not automatically tracked by the system. Process renaming should be done in Camunda Modeler first, then handled properly in your IDE:
+
+#### For Deprecated Processes:
+- When a process needs to be deprecated, rename it in Camunda Modeler to include "(DEPRECATED)" in the file name:
+  ```
+  Original: "Payment Process.bpmn"
+  Renamed: "Payment Process (DEPRECATED).bpmn"
+  ```
+- After downloading the files, you must manually delete the original file in your IDE as the renaming cannot be tracked automatically
+- GitHub will try to match files based on content similarity and will interpret this as a rename operation
+
+#### For Regular Name Changes:
+- If you're changing a process name in Camunda Modeler for any other reason:
+  ```
+  Original: "Payment Process.bpmn"
+  Renamed: "Updated Payment Process.bpmn"
+  ```
+- After downloading the files, you must manually delete the original file in your IDE as the renaming cannot be tracked automatically
+- GitHub will try to match files based on content similarity and may interpret this as a rename operation
+
+### 4. Review & Commit Changes
 
 After downloading, review the files in the `src` directory:
 
@@ -73,7 +103,7 @@ git commit -m "Add workflow files for WTR-123"
 git push origin dev
 ```
 
-### 3. Promote to Higher Environments
+### 5. Promote to Higher Environments
 
 After successful testing:
 
@@ -89,7 +119,7 @@ Target branch options:
 - prod: Production
 ```
 
-### 4. Automatic Deployment
+### 6. Automatic Deployment
 
 When your pull request is merged:
 
