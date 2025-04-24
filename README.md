@@ -12,7 +12,7 @@ Before using the scripts in this repository, ensure you have the following insta
 - **jq** - JSON processor for parsing API responses
   - Download and install from [Download jq](https://jqlang.org/download/)
   - Make sure jq is in your PATH or in the same directory as the scripts
-  - I recommend using [scoop](https://scoop.sh/) for windows
+  - I recommend using [scoop](https://scoop.sh/) on Windows (handles PATH variable)
 
 The scripts also use curl, which comes pre-installed with Git Bash, so no additional installation is required.
 
